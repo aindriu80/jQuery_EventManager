@@ -24,6 +24,12 @@ $(document).on("pagebeforeshow", "#details", function() {
   getEventDetails();
 });
 
+// Delete Event
+$(document).on("tap", ".delete", function() {
+  let eventId = $(this).data("id");
+  deleteEvent(eventId);
+});
+
 function createEvent(event) {
   console.log(event);
   axios
@@ -66,6 +72,7 @@ function getEvents() {
             <a onclick="eventClicked('${event._id.$oid}')" href="#">
               <h2>${event.name}</h2>
             </a>
+            <a href="#" data-id="${event._id.$oid}" class="delete">Delete</a>
           </li>
           `;
       });
@@ -83,11 +90,17 @@ function eventClicked(eventId) {
   $.mobile.changePage("#details");
 }
 
-function getEventDetails(){
-  let eventId = sessionStorage.getItem('eventId');
+function getEventDetails() {
+  let eventId = sessionStorage.getItem("eventId");
 
-  axios.get('https://api.mlab.com/api/1/databases/eventmanager/collections/events/'+eventId+'?apiKey='+apiKey)
-    .then(function(response){
+  axios
+    .get(
+      "https://api.mlab.com/api/1/databases/eventmanager/collections/events/" +
+        eventId +
+        "?apiKey=" +
+        apiKey
+    )
+    .then(function(response) {
       let event = response.data;
 
       let output = `
@@ -96,6 +109,22 @@ function getEventDetails(){
     <p>${event.description}</p>
     `;
       $("#eventDetails").html(output);
+    })
+    .catch(function(error) {
+      console.log(error);
+    });
+}
+
+function deleteEvent(eventId) {
+  axios
+    .delete(
+      "https://api.mlab.com/api/1/databases/eventmanager/collections/events/" +
+        eventId +
+        "?apiKey=" +
+        apiKey
+    )
+    .then(function(response) {
+      getEvents();
     })
     .catch(function(error) {
       console.log(error);
